@@ -22,7 +22,22 @@ describe('ERC721', function () {
     exampleNFTFactoryContract = await ExampleNFTFactory.deploy(exampleNFTContract.address);
     await exampleNFTFactoryContract.deployed();
 
-    await exampleNFTFactoryContract.connect(alice).createInstance("ALICE", "ALC");
+    // create a string array
+    const globalPropKeys = ['Collection', 'Author'];
+    const globalProps = ['Example Collection', 'Example Author'];
+    const stringProperties = [{
+      propertyName: 'Title',
+      editable: false
+    }, {
+      propertyName: 'Description',
+      editable: true
+    }];
+    // array of (string, bool) tuples
+    var uintProperties = [{
+      propertyName: 'Year',
+      editable: false
+    }];
+    await exampleNFTFactoryContract.connect(alice).createInstance("ALICE", "ALC", globalPropKeys, globalProps, uintProperties, stringProperties);
     aliceProxyContract = await ExampleNFT.attach(await exampleNFTFactoryContract.getProxy(alice.address));
   });
 
@@ -35,9 +50,8 @@ describe('ERC721', function () {
     expect(await aliceProxyContract.symbol()).to.equal('ALC');
   });
 
-  it("Should reflect the correct balances", async function () {
-    await aliceProxyContract.connect(alice).createNFT();
-    expect(await aliceProxyContract.balanceOf(alice.address)).to.equal(1);
-    expect(await aliceProxyContract.balanceOf(bob.address)).to.equal(0);
+  it("Should have the same number of dynamic properties", async function() {
+    expect(await aliceProxyContract.numberIndex()).to.equal(1);
+    expect(await aliceProxyContract.stringIndex()).to.equal(2);
   });
 });
