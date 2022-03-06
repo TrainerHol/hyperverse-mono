@@ -4,13 +4,14 @@
 pragma solidity ^0.8.0;
 
 import './MDynamicERC721.sol';
+import './hyperverse/IHyperverseModule.sol';
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-contract ExampleNFT is MDynamicERC721 {
+contract ExampleNFT is MDynamicERC721, IHyperverseModule {
 	uint256 public tokenCounter;
 
 	// Account used to deploy contract
@@ -23,6 +24,13 @@ contract ExampleNFT is MDynamicERC721 {
 	// _safeMint only available `internal`ly which is
 	// only possible if we call the constructor like this
 	constructor() {
+		metadata = ModuleMetadata(
+			'Dynamic Metadata Module',
+			Author(msg.sender, 'https://externallink.net'),
+			'1.0.0',
+			3479831479814,
+			'https://externallink.net'
+		);
 		contractOwner = msg.sender;
 	}
 
