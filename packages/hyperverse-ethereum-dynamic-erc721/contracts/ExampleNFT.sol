@@ -25,7 +25,7 @@ contract ExampleNFT is MDynamicERC721, IHyperverseModule {
 	// only possible if we call the constructor like this
 	constructor() {
 		metadata = ModuleMetadata(
-			'Dynamic Metadata Module',
+			'Dynamic ERC721 Module',
 			Author(msg.sender, 'https://externallink.net'),
 			'1.0.0',
 			3479831479814,
