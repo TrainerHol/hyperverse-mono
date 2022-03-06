@@ -1,15 +1,10 @@
 import { ABI, FactoryABI, ExampleNFTFactory } from './constants';
 import { ethers } from 'ethers';
 import { createContainer, useContainer } from '@decentology/unstated-next';
-import {
-	useQuery,
-	useMutation,
-	useQueryClient,
-	UseMutationOptions
-} from 'react-query';
+import { useQuery, useMutation, useQueryClient, UseMutationOptions } from 'react-query';
 import { useMemo, useState, useEffect, useCallback } from 'react';
 import { useEthereum } from '@decentology/hyperverse-ethereum';
-import { TENANT_ADDRESS } from './constants'
+import { TENANT_ADDRESS } from './constants';
 
 type ContractState = ethers.Contract;
 
@@ -35,7 +30,6 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 			if (accountSigner) {
 				setProxyContract(proxyCtr.connect(accountSigner));
 			} else {
-
 				setProxyContract(proxyCtr);
 			}
 		};
@@ -73,32 +67,48 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 		}
 	}, [setup, web3Provider]);
 
-	const createInstance = async (name: string, symbol: string) => {
+	type property = [propertyName: string, editable: boolean];
+	// TODO: Add createInstance parameters
+	const createInstance = async (
+		name: string,
+		symbol: string,
+		keys: string[],
+		globProps: string[],
+		numProps: property[],
+		stringProps: property[]
+	) => {
 		try {
-			console.log("name" + name + "symbol" + symbol)
-			const createTxn = await contract.createInstance(name, symbol);
+			console.log('name' + name + 'symbol' + symbol);
+			const createTxn = await contract.createInstance(
+				name,
+				symbol,
+				keys,
+				globProps,
+				numProps,
+				stringProps
+			);
 			return createTxn.wait();
 		} catch (err) {
 			errors(err);
 			throw err;
 		}
-	}
+	};
 
 	const getProxy = async (account: string | null) => {
 		try {
-			console.log("getProxy:", account);
+			console.log('getProxy:', account);
 			const proxyAccount = await contract.getProxy(account);
 			return proxyAccount;
 		} catch (err) {
 			errors(err);
 			throw err;
 		}
-	}
+	};
 
 	const getTotalSupply = async () => {
 		try {
 			const totalSupply = await proxyContract?.tokenCounter();
-			console.log("total supply:", totalSupply.toNumber())
+			console.log('total supply:', totalSupply.toNumber());
 			return totalSupply.toNumber();
 		} catch (err) {
 			errors(err);
@@ -108,7 +118,7 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 
 	const getBalance = async () => {
 		try {
-			console.log("getBalance:", address);
+			console.log('getBalance:', address);
 			const balance = await proxyContract?.balanceOf(address);
 			return balance.toNumber();
 		} catch (err) {
@@ -119,25 +129,26 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 
 	const getBalanceOf = async (account: string) => {
 		try {
-			console.log("balanceOf:", account);
+			console.log('balanceOf:', account);
 			const balance = await proxyContract?.balanceOf(account);
 			return balance.toNumber();
 		} catch (err) {
 			errors(err);
 			throw err;
 		}
-	}
+	};
 
 	const getOwnerOf = async (tokenId: number) => {
 		try {
-			console.log("ownerOf:", tokenId);
+			console.log('ownerOf:', tokenId);
 			const owner = await proxyContract?.ownerOf(tokenId);
 			return owner;
 		} catch (err) {
-			return "0x000";
+			return '0x000';
 		}
-	}
+	};
 
+	// TODO: Add createNFT parameters
 	const mintNFT = async (to: string) => {
 		try {
 			const mint = await proxyContract?.createNFT(to);
@@ -146,7 +157,7 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 			errors(err);
 			throw err;
 		}
-	}
+	};
 
 	const transfer = async (from: string, to: string, tokenId: number) => {
 		try {
@@ -156,7 +167,7 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 			errors(err);
 			throw err;
 		}
-	}
+	};
 
 	return {
 		tenantId,
@@ -166,45 +177,47 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 				UseMutationOptions<
 					unknown,
 					unknown,
-					{ name: string; symbol: string; },
+					{
+						name: string;
+						symbol: string;
+						keys: string[];
+						globProps: string[];
+						numProps: property[];
+						stringProps: property[];
+					},
 					unknown
 				>,
 				'mutationFn'
 			>
 		) =>
 			useMutation(
-				({ name, symbol }) =>
-					createInstance(name, symbol),
+				({ name, symbol, keys, globProps, numProps, stringProps }) =>
+					createInstance(name, symbol, keys, globProps, numProps, stringProps),
 				options
 			),
 		Proxy: () =>
 			useQuery(['getProxy', address, contract?.address], () => getProxy(address), {
-				enabled: !!address && !!contract?.address
+				enabled: !!address && !!contract?.address,
 			}),
 		TotalSupply: () =>
 			useQuery(['getTotalSupply', address], () => getTotalSupply(), {
-				enabled: !!proxyContract?.signer && !!address
+				enabled: !!proxyContract?.signer && !!address,
 			}),
 		Balance: () =>
 			useQuery(['getBalance', address], () => getBalance(), {
-				enabled: !!proxyContract?.signer && !!address
+				enabled: !!proxyContract?.signer && !!address,
 			}),
 		BalanceOf: (account: string) =>
 			useQuery(['getBalanceOf', address, { account }], () => getBalanceOf(account), {
-				enabled: !!proxyContract?.signer && !!address
+				enabled: !!proxyContract?.signer && !!address,
 			}),
 		OwnerOf: (tokenId: number) =>
 			useQuery(['getBalanceOf', address, { tokenId }], () => getOwnerOf(tokenId), {
-				enabled: !!proxyContract?.signer && !!address
+				enabled: !!proxyContract?.signer && !!address,
 			}),
 		MintNFT: (
 			options?: Omit<
-				UseMutationOptions<
-					unknown,
-					unknown,
-					{ to: string },
-					unknown
-				>,
+				UseMutationOptions<unknown, unknown, { to: string }, unknown>,
 				'mutationFn'
 			>
 		) => useMutation(({ to }) => mintNFT(to), options),
@@ -213,12 +226,12 @@ function ERC721State(initialState: { tenantId: string } = { tenantId: TENANT_ADD
 				UseMutationOptions<
 					unknown,
 					unknown,
-					{ from: string, to: string; tokenId: number },
+					{ from: string; to: string; tokenId: number },
 					unknown
 				>,
 				'mutationFn'
 			>
-		) => useMutation(({ from, to, tokenId }) => transfer(from, to, tokenId), options)
+		) => useMutation(({ from, to, tokenId }) => transfer(from, to, tokenId), options),
 	};
 }
 
@@ -227,4 +240,3 @@ export const ERC721 = createContainer(ERC721State);
 export function useERC721() {
 	return useContainer(ERC721);
 }
-
