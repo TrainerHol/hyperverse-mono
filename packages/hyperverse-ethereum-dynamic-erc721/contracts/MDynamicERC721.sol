@@ -10,13 +10,14 @@ import '@openzeppelin/contracts/utils/Address.sol';
 import '@openzeppelin/contracts/utils/Context.sol';
 import '@openzeppelin/contracts/utils/Strings.sol';
 import '@openzeppelin/contracts/utils/introspection/ERC165.sol';
+import './DynamicMetadata.sol';
 
 /**
  * @dev Implementation of https://eips.ethereum.org/EIPS/eip-721[ERC721] Non-Fungible Token Standard, including
  * the Metadata extension, but not including the Enumerable extension, which is available separately as
  * {ERC721Enumerable}.
  */
-contract MERC721 is Context, ERC165, IERC721, IERC721Metadata {
+contract MDynamicERC721 is Context, ERC165, IERC721, IERC721Metadata, DynamicMetadata {
 	using Address for address;
 	using Strings for uint256;
 
@@ -104,10 +105,7 @@ contract MERC721 is Context, ERC165, IERC721, IERC721Metadata {
 	 */
 	function tokenURI(uint256 tokenId) public view virtual override returns (string memory) {
 		require(_exists(tokenId), 'ERC721Metadata: URI query for nonexistent token');
-
-		string memory baseURI = _baseURI();
-		return
-			bytes(baseURI).length > 0 ? string(abi.encodePacked(baseURI, tokenId.toString())) : '';
+		return buildTokenURI(tokenId);
 	}
 
 	/**
@@ -123,7 +121,7 @@ contract MERC721 is Context, ERC165, IERC721, IERC721Metadata {
 	 * @dev See {IERC721-approve}.
 	 */
 	function approve(address to, uint256 tokenId) public virtual override {
-		address owner = MERC721.ownerOf(tokenId);
+		address owner = MDynamicERC721.ownerOf(tokenId);
 		require(to != owner, 'ERC721: approval to current owner');
 
 		require(
@@ -264,7 +262,7 @@ contract MERC721 is Context, ERC165, IERC721, IERC721Metadata {
 		returns (bool)
 	{
 		require(_exists(tokenId), 'ERC721: operator query for nonexistent token');
-		address owner = MERC721.ownerOf(tokenId);
+		address owner = MDynamicERC721.ownerOf(tokenId);
 		return (spender == owner ||
 			getApproved(tokenId) == spender ||
 			isApprovedForAll(owner, spender));
@@ -337,7 +335,7 @@ contract MERC721 is Context, ERC165, IERC721, IERC721Metadata {
 	 * Emits a {Transfer} event.
 	 */
 	function _burn(uint256 tokenId) internal virtual {
-		address owner = MERC721.ownerOf(tokenId);
+		address owner = MDynamicERC721.ownerOf(tokenId);
 
 		_beforeTokenTransfer(owner, address(0), tokenId);
 
@@ -368,7 +366,7 @@ contract MERC721 is Context, ERC165, IERC721, IERC721Metadata {
 		address to,
 		uint256 tokenId
 	) internal virtual {
-		require(MERC721.ownerOf(tokenId) == from, 'ERC721: transfer from incorrect owner');
+		require(MDynamicERC721.ownerOf(tokenId) == from, 'ERC721: transfer from incorrect owner');
 		require(to != address(0), 'ERC721: transfer to the zero address');
 
 		_beforeTokenTransfer(from, to, tokenId);
@@ -392,7 +390,7 @@ contract MERC721 is Context, ERC165, IERC721, IERC721Metadata {
 	 */
 	function _approve(address to, uint256 tokenId) internal virtual {
 		_tokenApprovals[tokenId] = to;
-		emit Approval(MERC721.ownerOf(tokenId), to, tokenId);
+		emit Approval(MDynamicERC721.ownerOf(tokenId), to, tokenId);
 	}
 
 	/**

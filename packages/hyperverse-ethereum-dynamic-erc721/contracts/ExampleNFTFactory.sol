@@ -48,12 +48,27 @@ contract ExampleNFTFactory is CloneFactory {
 
 	/*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ F U N C T I O N S @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
-	function createInstance(string memory name, string memory symbol) external {
+	function createInstance(
+		string memory name,
+		string memory symbol,
+		string[] memory _globalMetadataKeys,
+		string[] memory _globalMetadata,
+		NumericalProperty[] memory _numericalProperties,
+		StringProperty[] memory _stringProperties
+	) external {
 		address tenant = msg.sender;
 		ExampleNFT nft = ExampleNFT(createClone(masterContract));
 
 		//initializing tenant state of clone
-		nft.init(name, symbol, tenant);
+		nft.init(
+			name,
+			symbol,
+			tenant,
+			_globalMetadataKeys,
+			_globalMetadata,
+			_numericalProperties,
+			_stringProperties
+		);
 
 		//set Tenant data
 		Tenant storage newTenant = tenants[tenant];
