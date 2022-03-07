@@ -1,6 +1,6 @@
-# Basic Sample Hardhat Project
+# Dynamic ERC271
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, a sample script that deploys that contract, and an example of a task implementation, which simply lists the available accounts.
+A dynamic/on-chain NFT metadata reader that generates the JSON depending on the fields stored in the metadata
 
 Try running some of the following tasks:
 
